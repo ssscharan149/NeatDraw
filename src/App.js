@@ -20,6 +20,7 @@ function App() {
   const [shapeStart, setShapeStart] = useState(null);
   const [shapeEnd, setShapeEnd] = useState(null);
   const [isDrawingShape, setIsDrawingShape] = useState(false);
+  const [fillShape, setFillShape] = useState(false); // false = outline, true = fill
 
   // --- Stroke-based drawing state ---
   const [strokes, setStrokes] = useState([]); // Array of stroke objects
@@ -132,7 +133,7 @@ function App() {
   }, [historyIndex]);
 
   // Draw a shape preview (on top of the last saved state)
-  const drawShapePreview = (ctx, start, end, style, size, color, eraser) => {
+  const drawShapePreview = (ctx, start, end, style, size, color, eraser, fill) => {
     setCtxStyle(ctx, 1, size, color, false, eraser);
     ctx.save();
     ctx.globalAlpha = 0.7;
@@ -144,24 +145,24 @@ function App() {
     } else if (style === 'rect') {
       ctx.beginPath();
       ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
-      ctx.stroke();
+      fill ? ctx.fill() : ctx.stroke();
     } else if (style === 'circle') {
       ctx.beginPath();
       const r = Math.hypot(end.x - start.x, end.y - start.y);
       ctx.arc(start.x, start.y, r, 0, 2 * Math.PI);
-      ctx.stroke();
+      fill ? ctx.fill() : ctx.stroke();
     } else if (style === 'ellipse') {
       ctx.beginPath();
       const rx = Math.abs(end.x - start.x);
       const ry = Math.abs(end.y - start.y);
       ctx.ellipse(start.x, start.y, rx, ry, 0, 0, 2 * Math.PI);
-      ctx.stroke();
+      fill ? ctx.fill() : ctx.stroke();
     }
     ctx.restore();
   };
 
   // Draw a shape permanently (on mouse up)
-  const drawShapeFinal = (ctx, start, end, style, size, color, eraser) => {
+  const drawShapeFinal = (ctx, start, end, style, size, color, eraser, fill) => {
     setCtxStyle(ctx, 1, size, color, false, eraser);
     if (style === 'line') {
       ctx.beginPath();
@@ -171,18 +172,18 @@ function App() {
     } else if (style === 'rect') {
       ctx.beginPath();
       ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
-      ctx.stroke();
+      fill ? ctx.fill() : ctx.stroke();
     } else if (style === 'circle') {
       ctx.beginPath();
       const r = Math.hypot(end.x - start.x, end.y - start.y);
       ctx.arc(start.x, start.y, r, 0, 2 * Math.PI);
-      ctx.stroke();
+      fill ? ctx.fill() : ctx.stroke();
     } else if (style === 'ellipse') {
       ctx.beginPath();
       const rx = Math.abs(end.x - start.x);
       const ry = Math.abs(end.y - start.y);
       ctx.ellipse(start.x, start.y, rx, ry, 0, 0, 2 * Math.PI);
-      ctx.stroke();
+      fill ? ctx.fill() : ctx.stroke();
     }
   };
 
@@ -223,7 +224,8 @@ function App() {
         shapeType,
         getCurrentSize(),
         tool === 'eraser' ? '#000' : brushColor,
-        tool === 'eraser'
+        tool === 'eraser',
+        fillShape
       );
       // Add shape stroke to strokes array
       const newStroke = {
@@ -234,6 +236,7 @@ function App() {
         shapeType,
         start: shapeStart,
         end,
+        fill: fillShape,
       };
       let newStrokes = strokes;
       if (strokeIndex < strokes.length) {
@@ -304,7 +307,8 @@ function App() {
         shapeType,
         getCurrentSize(),
         tool === 'eraser' ? '#000' : brushColor,
-        tool === 'eraser'
+        tool === 'eraser',
+        fillShape
       );
       return;
     }
@@ -404,7 +408,7 @@ function App() {
         // Draw shape (line, rect, circle, ellipse)
         ctx.save();
         setCtxStyle(ctx, 1, s.size, s.color, false, s.style === 'eraser');
-        const { start, end, shapeType } = s;
+        const { start, end, shapeType, fill } = s;
         if (shapeType === 'line') {
           ctx.beginPath();
           ctx.moveTo(start.x, start.y);
@@ -413,18 +417,18 @@ function App() {
         } else if (shapeType === 'rect') {
           ctx.beginPath();
           ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
-          ctx.stroke();
+          fill ? ctx.fill() : ctx.stroke();
         } else if (shapeType === 'circle') {
           ctx.beginPath();
           const r = Math.hypot(end.x - start.x, end.y - start.y);
           ctx.arc(start.x, start.y, r, 0, 2 * Math.PI);
-          ctx.stroke();
+          fill ? ctx.fill() : ctx.stroke();
         } else if (shapeType === 'ellipse') {
           ctx.beginPath();
           const rx = Math.abs(end.x - start.x);
           const ry = Math.abs(end.y - start.y);
           ctx.ellipse(start.x, start.y, rx, ry, 0, 0, 2 * Math.PI);
-          ctx.stroke();
+          fill ? ctx.fill() : ctx.stroke();
         }
         ctx.restore();
       }
@@ -555,6 +559,17 @@ function App() {
             <option value="ellipse">Ellipse</option>
           </select>
         </label>
+        {shapeType !== 'freehand' && tool !== 'eraser' && (
+          <label style={{ marginRight: 10, display: 'flex', alignItems: 'center' }}>
+            <input
+              type="checkbox"
+              checked={fillShape}
+              onChange={e => setFillShape(e.target.checked)}
+              style={{ marginRight: 6 }}
+            />
+            Fill
+          </label>
+        )}
         {/* {tool === 'eraser' && (
           <span style={{ color: '#f88', marginLeft: 8, fontSize: '0.95em' }}>
             Eraser only works in freehand mode.
