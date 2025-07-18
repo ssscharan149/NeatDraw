@@ -1,6 +1,10 @@
 import React, { useRef, useState } from 'react';
 import './App.css';
 
+const COMMON_COLORS = [
+  '#ffffff', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#888888', '#ffa500', '#800080'
+];
+
 function App() {
   const canvasRef = useRef(null);
   const [drawing, setDrawing] = useState(false);
@@ -8,10 +12,10 @@ function App() {
   const [history, setHistory] = useState([]); // Array of image data
   const [historyIndex, setHistoryIndex] = useState(-1); // Pointer to current state
   const [hasMoved, setHasMoved] = useState(false); // Track if mouse moved during stroke
-  const [brushColor, setBrushColor] = useState('#000000');
+  const [brushColor, setBrushColor] = useState('#ffffff');
   const [brushSize, setBrushSize] = useState(5);
   const [eraserSize, setEraserSize] = useState(20);
-  const [strokeStyle, setStrokeStyle] = useState('pen'); // 'pen', 'brush', 'pencil', 'eraser'
+  const [tool, setTool] = useState('pen'); // 'pen', 'brush', 'pencil', 'eraser'
   const [shapeType, setShapeType] = useState('freehand'); // 'freehand', 'line', 'rect', 'circle', 'ellipse'
   const [shapeStart, setShapeStart] = useState(null);
   const [shapeEnd, setShapeEnd] = useState(null);
@@ -24,7 +28,7 @@ function App() {
   // --- Freehand drawing state for stroke-based ---
   const [currentPoints, setCurrentPoints] = useState([]);
 
-  const getCurrentSize = () => (strokeStyle === 'eraser' ? eraserSize : brushSize);
+  const getCurrentSize = () => (tool === 'eraser' ? eraserSize : brushSize);
 
   const saveToHistory = (customCanvas) => {
     const canvas = customCanvas || canvasRef.current;
@@ -45,8 +49,8 @@ function App() {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     if (eraser) {
-      ctx.strokeStyle = '#fff';
-      ctx.fillStyle = '#fff';
+      ctx.strokeStyle = '#000'; // black background
+      ctx.fillStyle = '#000';
       ctx.globalAlpha = 1.0;
     } else {
       ctx.strokeStyle = color || brushColor;
@@ -56,8 +60,8 @@ function App() {
       ctx.shadowBlur = 0;
       if (pencil) {
         ctx.globalAlpha = 1.0;
-        ctx.strokeStyle = '#222';
-        ctx.fillStyle = '#222';
+        ctx.strokeStyle = '#ccc';
+        ctx.fillStyle = '#ccc';
       }
     }
   };
@@ -81,12 +85,12 @@ function App() {
   const drawDot = (x, y) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    if (strokeStyle === 'brush') {
+    if (tool === 'brush') {
       drawBrushDot(x, y);
-    } else if (strokeStyle === 'eraser') {
+    } else if (tool === 'eraser') {
       drawBrushDot(x, y, true);
-    } else if (strokeStyle === 'pencil') {
-      setCtxStyle(ctx, 1.0, brushSize * 0.8, '#222', true);
+    } else if (tool === 'pencil') {
+      setCtxStyle(ctx, 1.0, brushSize * 0.8, '#ccc', true);
       ctx.beginPath();
       ctx.arc(x, y, (brushSize * 0.8) / 2, 0, 2 * Math.PI);
       ctx.fill();
@@ -218,14 +222,14 @@ function App() {
         end,
         shapeType,
         getCurrentSize(),
-        strokeStyle === 'eraser' ? '#fff' : brushColor,
-        strokeStyle === 'eraser'
+        tool === 'eraser' ? '#000' : brushColor,
+        tool === 'eraser'
       );
       // Add shape stroke to strokes array
       const newStroke = {
         type: 'shape',
-        style: strokeStyle,
-        color: strokeStyle === 'eraser' ? '#fff' : brushColor,
+        style: tool,
+        color: tool === 'eraser' ? '#000' : brushColor,
         size: getCurrentSize(),
         shapeType,
         start: shapeStart,
@@ -253,8 +257,8 @@ function App() {
     if (currentPoints.length === 1 || currentPoints.length > 1) {
       const newStroke = {
         type: 'freehand',
-        style: strokeStyle,
-        color: strokeStyle === 'eraser' ? '#fff' : brushColor,
+        style: tool,
+        color: tool === 'eraser' ? '#000' : brushColor,
         size: getCurrentSize(),
         points: currentPoints,
       };
@@ -299,8 +303,8 @@ function App() {
         { x, y },
         shapeType,
         getCurrentSize(),
-        strokeStyle === 'eraser' ? '#fff' : brushColor,
-        strokeStyle === 'eraser'
+        tool === 'eraser' ? '#000' : brushColor,
+        tool === 'eraser'
       );
       return;
     }
@@ -319,14 +323,14 @@ function App() {
     replayStrokes();
     if (pointsForLive.length === 1) {
       ctx.save();
-      setCtxStyle(ctx, 1, getCurrentSize(), strokeStyle === 'eraser' ? '#fff' : brushColor, strokeStyle === 'pencil', strokeStyle === 'eraser');
+      setCtxStyle(ctx, 1, getCurrentSize(), tool === 'eraser' ? '#000' : brushColor, tool === 'pencil', tool === 'eraser');
       ctx.beginPath();
       ctx.arc(pointsForLive[0].x, pointsForLive[0].y, getCurrentSize() / 2, 0, 2 * Math.PI);
       ctx.fill();
       ctx.restore();
     } else if (pointsForLive.length > 1) {
       ctx.save();
-      setCtxStyle(ctx, 1, getCurrentSize(), strokeStyle === 'eraser' ? '#fff' : brushColor, strokeStyle === 'pencil', strokeStyle === 'eraser');
+      setCtxStyle(ctx, 1, getCurrentSize(), tool === 'eraser' ? '#000' : brushColor, tool === 'pencil', tool === 'eraser');
       ctx.beginPath();
       ctx.moveTo(pointsForLive[0].x, pointsForLive[0].y);
       for (let i = 1; i < pointsForLive.length; i++) {
@@ -361,14 +365,14 @@ function App() {
       const ctx = canvas.getContext('2d');
       setCtxStyle(ctx);
     }
-  }, [brushSize, brushColor, strokeStyle, eraserSize]);
+  }, [brushSize, brushColor, tool, eraserSize]);
 
   // When eraser is selected, force shapeType to 'freehand'
   React.useEffect(() => {
-    if (strokeStyle === 'eraser' && shapeType !== 'freehand') {
+    if (tool === 'eraser' && shapeType !== 'freehand') {
       setShapeType('freehand');
     }
-  }, [strokeStyle]);
+  }, [tool]);
 
   // Replay all strokes up to strokeIndex
   const replayStrokes = () => {
@@ -432,26 +436,74 @@ function App() {
     replayStrokes();
   }, [strokes, strokeIndex]);
 
+  // Tool button UI
+  const toolButtons = [
+    { key: 'pen', label: 'Pen' },
+    { key: 'brush', label: 'Brush' },
+    { key: 'pencil', label: 'Pencil' },
+    { key: 'eraser', label: 'Eraser' },
+  ];
+
   return (
-    <div className="App">
-      <h2>NeatDraw</h2>
-      <div style={{ marginBottom: 10 }}>
-        <button onClick={clearCanvas}>Clear</button>
-        <button onClick={undo} disabled={strokeIndex <= 0} style={{ marginLeft: 8 }}>Undo</button>
-        <button onClick={redo} disabled={strokeIndex >= strokes.length} style={{ marginLeft: 8 }}>Redo</button>
+    <div className="App" style={{ background: '#181818', minHeight: '100vh', color: '#fff' }}>
+      <h2 style={{ color: '#fff' }}>NeatDraw</h2>
+      <div style={{ marginBottom: 16, display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'center' }}>
+        {toolButtons.map(btn => (
+          <button
+            key={btn.key}
+            onClick={() => setTool(btn.key)}
+            style={{
+              padding: '8px 18px',
+              borderRadius: 6,
+              border: tool === btn.key ? '2px solid #fff' : '1px solid #444',
+              background: tool === btn.key ? '#333' : '#222',
+              color: tool === btn.key ? '#fff' : '#ccc',
+              fontWeight: tool === btn.key ? 'bold' : 'normal',
+              fontSize: 16,
+              cursor: 'pointer',
+              outline: 'none',
+              boxShadow: tool === btn.key ? '0 0 8px #fff2' : 'none',
+              transition: 'all 0.15s',
+            }}
+          >
+            {btn.label}
+          </button>
+        ))}
       </div>
-      <div style={{ marginBottom: 10 }}>
-        <label style={{ marginRight: 10 }}>
+      <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 16, justifyContent: 'center' }}>
+        <label style={{ marginRight: 10, display: 'flex', alignItems: 'center' }}>
           Color:
           <input
             type="color"
             value={brushColor}
             onChange={e => setBrushColor(e.target.value)}
-            style={{ marginLeft: 5 }}
-            disabled={strokeStyle === 'eraser'}
+            style={{ marginLeft: 5, width: 32, height: 32, border: 'none', background: 'none' }}
+            disabled={tool === 'eraser'}
           />
         </label>
-        <label style={{ marginRight: 10 }}>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {COMMON_COLORS.map(color => (
+            <button
+              key={color}
+              onClick={() => setBrushColor(color)}
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: '50%',
+                border: brushColor === color ? '2px solid #fff' : '1px solid #444',
+                background: color,
+                margin: 0,
+                cursor: 'pointer',
+                outline: 'none',
+                boxShadow: brushColor === color ? '0 0 6px #fff8' : 'none',
+                transition: 'all 0.15s',
+              }}
+              disabled={tool === 'eraser'}
+              aria-label={color}
+            />
+          ))}
+        </div>
+        <label style={{ marginRight: 10, display: tool !== 'eraser' ? 'flex' : 'none', alignItems: 'center' }}>
           Size:
           <input
             type="range"
@@ -460,12 +512,12 @@ function App() {
             value={brushSize}
             onChange={e => setBrushSize(Number(e.target.value))}
             style={{ marginLeft: 5 }}
-            disabled={strokeStyle === 'eraser'}
+            disabled={tool === 'eraser'}
           />
           <span style={{ marginLeft: 8 }}>{brushSize}px</span>
         </label>
-        {strokeStyle === 'eraser' && (
-          <label style={{ marginRight: 10 }}>
+        {tool === 'eraser' && (
+          <label style={{ marginRight: 10, display: 'flex', alignItems: 'center' }}>
             Eraser Size:
             <input
               type="range"
@@ -480,7 +532,7 @@ function App() {
         )}
         <label style={{ marginRight: 10 }}>
           Shape:
-          <select value={shapeType} onChange={e => setShapeType(e.target.value)} style={{ marginLeft: 5 }} disabled={strokeStyle === 'eraser'}>
+          <select value={shapeType} onChange={e => setShapeType(e.target.value)} style={{ marginLeft: 5 }} disabled={tool === 'eraser'}>
             <option value="freehand">Freehand</option>
             <option value="line">Line</option>
             <option value="rect">Rectangle</option>
@@ -488,21 +540,20 @@ function App() {
             <option value="ellipse">Ellipse</option>
           </select>
         </label>
-        <label>
-          Style:
-          <select value={strokeStyle} onChange={e => setStrokeStyle(e.target.value)} style={{ marginLeft: 5 }}>
-            <option value="pen">Pen</option>
-            <option value="brush">Brush</option>
-            <option value="pencil">Pencil</option>
-            <option value="eraser">Eraser</option>
-          </select>
-        </label>
+        {/* {tool === 'eraser' && (
+          <span style={{ color: '#f88', marginLeft: 8, fontSize: '0.95em' }}>
+            Eraser only works in freehand mode.
+          </span>
+        )} */}
+        <button onClick={clearCanvas} style={{ marginLeft: 16, padding: '8px 18px', borderRadius: 6, border: '1px solid #444', background: '#222', color: '#fff', fontWeight: 'bold', fontSize: 16, cursor: 'pointer' }}>Clear</button>
+        <button onClick={undo} disabled={strokeIndex <= 0} style={{ marginLeft: 8, padding: '8px 18px', borderRadius: 6, border: '1px solid #444', background: '#222', color: '#fff', fontWeight: 'bold', fontSize: 16, cursor: strokeIndex <= 0 ? 'not-allowed' : 'pointer', opacity: strokeIndex <= 0 ? 0.5 : 1 }}>Undo</button>
+        <button onClick={redo} disabled={strokeIndex >= strokes.length} style={{ marginLeft: 8, padding: '8px 18px', borderRadius: 6, border: '1px solid #444', background: '#222', color: '#fff', fontWeight: 'bold', fontSize: 16, cursor: strokeIndex >= strokes.length ? 'not-allowed' : 'pointer', opacity: strokeIndex >= strokes.length ? 0.5 : 1 }}>Redo</button>
       </div>
       <canvas
         ref={canvasRef}
-        width={500}
+        width={800}
         height={400}
-        style={{ border: '1px solid #000', background: '#fff' }}
+        style={{ border: '1px solid #fff', background: '#000', display: 'block', margin: '0 auto', boxShadow: '0 0 16px #000a' }}
         onMouseDown={startDrawing}
         onMouseUp={stopDrawing}
         onMouseOut={stopDrawing}
