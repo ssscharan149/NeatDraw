@@ -21,6 +21,9 @@ function App() {
   const [strokes, setStrokes] = useState([]); // Array of stroke objects
   const [strokeIndex, setStrokeIndex] = useState(0); // Pointer for undo/redo
 
+  // --- Freehand drawing state for stroke-based ---
+  const [currentPoints, setCurrentPoints] = useState([]);
+
   const getCurrentSize = () => (strokeStyle === 'eraser' ? eraserSize : brushSize);
 
   const saveToHistory = (customCanvas) => {
@@ -179,6 +182,7 @@ function App() {
     }
   };
 
+  // --- Freehand drawing logic ---
   const startDrawing = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.nativeEvent.clientX - rect.left;
@@ -192,6 +196,7 @@ function App() {
       setDrawing(true);
       setHasMoved(false);
       setLastPos({ x, y });
+      setCurrentPoints([{ x, y }]);
     }
   };
 
@@ -216,7 +221,22 @@ function App() {
         strokeStyle === 'eraser' ? '#fff' : brushColor,
         strokeStyle === 'eraser'
       );
-      saveToHistory();
+      // Add shape stroke to strokes array
+      const newStroke = {
+        type: 'shape',
+        style: strokeStyle,
+        color: strokeStyle === 'eraser' ? '#fff' : brushColor,
+        size: getCurrentSize(),
+        shapeType,
+        start: shapeStart,
+        end,
+      };
+      let newStrokes = strokes;
+      if (strokeIndex < strokes.length) {
+        newStrokes = strokes.slice(0, strokeIndex);
+      }
+      setStrokes([...newStrokes, newStroke]);
+      setStrokeIndex((prev) => prev + 1);
       setShapeStart(null);
       setShapeEnd(null);
       return;
@@ -227,11 +247,25 @@ function App() {
       const rect = canvasRef.current.getBoundingClientRect();
       const x = e.nativeEvent.clientX - rect.left;
       const y = e.nativeEvent.clientY - rect.top;
-      drawDot(x, y);
-      saveToHistory();
-    } else {
-      saveToHistory();
+      setCurrentPoints((pts) => [...pts, { x, y }]);
     }
+    // Add freehand stroke to strokes array
+    if (currentPoints.length > 1) {
+      const newStroke = {
+        type: 'freehand',
+        style: strokeStyle,
+        color: strokeStyle === 'eraser' ? '#fff' : brushColor,
+        size: getCurrentSize(),
+        points: currentPoints,
+      };
+      let newStrokes = strokes;
+      if (strokeIndex < strokes.length) {
+        newStrokes = strokes.slice(0, strokeIndex);
+      }
+      setStrokes([...newStrokes, newStroke]);
+      setStrokeIndex((prev) => prev + 1);
+    }
+    setCurrentPoints([]);
   };
 
   //Draw brush/eraser dots along the path
@@ -255,9 +289,10 @@ function App() {
       const x = e.nativeEvent.clientX - rect.left;
       const y = e.nativeEvent.clientY - rect.top;
       setShapeEnd({ x, y });
+      // Preview: clear, redraw last state, then draw preview shape
+      replayStrokes();
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
-      restoreFromDataUrl(history[historyIndex]);
       drawShapePreview(
         ctx,
         shapeStart,
@@ -271,29 +306,23 @@ function App() {
     }
     if (!drawing) return;
     setHasMoved(true);
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasRef.current.getBoundingClientRect();
     const x = e.nativeEvent.clientX - rect.left;
     const y = e.nativeEvent.clientY - rect.top;
-    if (strokeStyle === 'brush') {
-      drawBrushLine(lastPos.x, lastPos.y, x, y);
-    } else if (strokeStyle === 'eraser') {
-      drawBrushLine(lastPos.x, lastPos.y, x, y, true);
-    } else if (strokeStyle === 'pencil') {
-      setCtxStyle(ctx, 1.0, brushSize * 0.8, '#222', true);
+    setCurrentPoints((pts) => [...pts, { x, y }]);
+    // Draw current segment for live feedback
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    replayStrokes();
+    if (currentPoints.length > 0) {
+      ctx.save();
+      setCtxStyle(ctx, 1, getCurrentSize(), strokeStyle === 'eraser' ? '#fff' : brushColor, strokeStyle === 'pencil', strokeStyle === 'eraser');
       ctx.beginPath();
-      ctx.moveTo(lastPos.x, lastPos.y);
+      ctx.moveTo(currentPoints[currentPoints.length - 1].x, currentPoints[currentPoints.length - 1].y);
       ctx.lineTo(x, y);
       ctx.stroke();
-    } else {
-      setCtxStyle(ctx);
-      ctx.beginPath();
-      ctx.moveTo(lastPos.x, lastPos.y);
-      ctx.lineTo(x, y);
-      ctx.stroke();
+      ctx.restore();
     }
-    setLastPos({ x, y });
   };
 
   const clearCanvas = () => {
@@ -312,15 +341,16 @@ function App() {
     }
   };
 
+  // Undo/Redo for stroke-based
   const undo = () => {
-    if (historyIndex > 0) {
-      setHistoryIndex(historyIndex - 1);
+    if (strokeIndex > 0) {
+      setStrokeIndex(strokeIndex - 1);
     }
   };
 
   const redo = () => {
-    if (historyIndex < history.length - 1) {
-      setHistoryIndex(historyIndex + 1);
+    if (strokeIndex < strokes.length) {
+      setStrokeIndex(strokeIndex + 1);
     }
   };
 
