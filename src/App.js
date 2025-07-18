@@ -338,19 +338,8 @@ function App() {
   };
 
   const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    let newHistory = history;
-    if (historyIndex < history.length - 1) {
-      newHistory = history.slice(0, historyIndex + 1);
-    }
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const clearedDataUrl = canvas.toDataURL();
-    if (newHistory.length === 0 || newHistory[newHistory.length - 1] !== clearedDataUrl) {
-      newHistory = [...newHistory, clearedDataUrl];
-      setHistory(newHistory);
-      setHistoryIndex(newHistory.length - 1);
-    }
+    setStrokes([]);
+    setStrokeIndex(0);
   };
 
   // Undo/Redo for stroke-based
