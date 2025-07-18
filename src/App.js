@@ -317,7 +317,14 @@ function App() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     replayStrokes();
-    if (pointsForLive.length > 1) {
+    if (pointsForLive.length === 1) {
+      ctx.save();
+      setCtxStyle(ctx, 1, getCurrentSize(), strokeStyle === 'eraser' ? '#fff' : brushColor, strokeStyle === 'pencil', strokeStyle === 'eraser');
+      ctx.beginPath();
+      ctx.arc(pointsForLive[0].x, pointsForLive[0].y, getCurrentSize() / 2, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.restore();
+    } else if (pointsForLive.length > 1) {
       ctx.save();
       setCtxStyle(ctx, 1, getCurrentSize(), strokeStyle === 'eraser' ? '#fff' : brushColor, strokeStyle === 'pencil', strokeStyle === 'eraser');
       ctx.beginPath();
@@ -384,15 +391,21 @@ function App() {
       const s = strokes[i];
       if (!s) continue;
       if (s.type === 'freehand') {
-        // Draw freehand stroke
         ctx.save();
         setCtxStyle(ctx, 1, s.size, s.color, s.style === 'pencil', s.style === 'eraser');
-        ctx.beginPath();
-        ctx.moveTo(s.points[0].x, s.points[0].y);
-        for (let j = 1; j < s.points.length; j++) {
-          ctx.lineTo(s.points[j].x, s.points[j].y);
+        if (s.points.length === 1) {
+          // Draw a dot
+          ctx.beginPath();
+          ctx.arc(s.points[0].x, s.points[0].y, s.size / 2, 0, 2 * Math.PI);
+          ctx.fill();
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(s.points[0].x, s.points[0].y);
+          for (let j = 1; j < s.points.length; j++) {
+            ctx.lineTo(s.points[j].x, s.points[j].y);
+          }
+          ctx.stroke();
         }
-        ctx.stroke();
         ctx.restore();
       } else if (s.type === 'shape') {
         // Draw shape (line, rect, circle, ellipse)
