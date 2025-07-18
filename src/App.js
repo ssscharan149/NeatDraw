@@ -339,6 +339,62 @@ function App() {
     }
   }, [strokeStyle]);
 
+  // Replay all strokes up to strokeIndex
+  const replayStrokes = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < strokeIndex; i++) {
+      const s = strokes[i];
+      if (!s) continue;
+      if (s.type === 'freehand') {
+        // Draw freehand stroke
+        ctx.save();
+        setCtxStyle(ctx, 1, s.size, s.color, s.style === 'pencil', s.style === 'eraser');
+        ctx.beginPath();
+        ctx.moveTo(s.points[0].x, s.points[0].y);
+        for (let j = 1; j < s.points.length; j++) {
+          ctx.lineTo(s.points[j].x, s.points[j].y);
+        }
+        ctx.stroke();
+        ctx.restore();
+      } else if (s.type === 'shape') {
+        // Draw shape (line, rect, circle, ellipse)
+        ctx.save();
+        setCtxStyle(ctx, 1, s.size, s.color, false, s.style === 'eraser');
+        const { start, end, shapeType } = s;
+        if (shapeType === 'line') {
+          ctx.beginPath();
+          ctx.moveTo(start.x, start.y);
+          ctx.lineTo(end.x, end.y);
+          ctx.stroke();
+        } else if (shapeType === 'rect') {
+          ctx.beginPath();
+          ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
+          ctx.stroke();
+        } else if (shapeType === 'circle') {
+          ctx.beginPath();
+          const r = Math.hypot(end.x - start.x, end.y - start.y);
+          ctx.arc(start.x, start.y, r, 0, 2 * Math.PI);
+          ctx.stroke();
+        } else if (shapeType === 'ellipse') {
+          ctx.beginPath();
+          const rx = Math.abs(end.x - start.x);
+          const ry = Math.abs(end.y - start.y);
+          ctx.ellipse(start.x, start.y, rx, ry, 0, 0, 2 * Math.PI);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+  };
+
+  // Redraw canvas from strokes on every change
+  React.useEffect(() => {
+    replayStrokes();
+  }, [strokes, strokeIndex]);
+
   return (
     <div className="App">
       <h2>NeatDraw</h2>
