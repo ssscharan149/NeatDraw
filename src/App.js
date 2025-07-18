@@ -5,17 +5,21 @@ function App() {
   const canvasRef = useRef(null);
   const [drawing, setDrawing] = useState(false);
   const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
-  const [history, setHistory] = useState([]);
-  const [historyIndex, setHistoryIndex] = useState(-1); 
-  const [hasMoved, setHasMoved] = useState(false); 
+  const [history, setHistory] = useState([]); // Array of image data
+  const [historyIndex, setHistoryIndex] = useState(-1); // Pointer to current state
+  const [hasMoved, setHasMoved] = useState(false); // Track if mouse moved during stroke
   const [brushColor, setBrushColor] = useState('#000000');
   const [brushSize, setBrushSize] = useState(5);
   const [eraserSize, setEraserSize] = useState(20);
-  const [strokeStyle, setStrokeStyle] = useState('pen'); 
-  const [shapeType, setShapeType] = useState('freehand');
+  const [strokeStyle, setStrokeStyle] = useState('pen'); // 'pen', 'brush', 'pencil', 'eraser'
+  const [shapeType, setShapeType] = useState('freehand'); // 'freehand', 'line', 'rect', 'circle', 'ellipse'
   const [shapeStart, setShapeStart] = useState(null);
   const [shapeEnd, setShapeEnd] = useState(null);
   const [isDrawingShape, setIsDrawingShape] = useState(false);
+
+  // --- Stroke-based drawing state ---
+  const [strokes, setStrokes] = useState([]); // Array of stroke objects
+  const [strokeIndex, setStrokeIndex] = useState(0); // Pointer for undo/redo
 
   const getCurrentSize = () => (strokeStyle === 'eraser' ? eraserSize : brushSize);
 
