@@ -309,17 +309,22 @@ function App() {
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.nativeEvent.clientX - rect.left;
     const y = e.nativeEvent.clientY - rect.top;
-    setCurrentPoints((pts) => [...pts, { x, y }]);
+    // Use a local array for live feedback
+    const newPoint = { x, y };
+    const pointsForLive = [...currentPoints, newPoint];
+    setCurrentPoints(pointsForLive);
     // Draw current segment for live feedback
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     replayStrokes();
-    if (currentPoints.length > 0) {
+    if (pointsForLive.length > 1) {
       ctx.save();
       setCtxStyle(ctx, 1, getCurrentSize(), strokeStyle === 'eraser' ? '#fff' : brushColor, strokeStyle === 'pencil', strokeStyle === 'eraser');
       ctx.beginPath();
-      ctx.moveTo(currentPoints[currentPoints.length - 1].x, currentPoints[currentPoints.length - 1].y);
-      ctx.lineTo(x, y);
+      ctx.moveTo(pointsForLive[0].x, pointsForLive[0].y);
+      for (let i = 1; i < pointsForLive.length; i++) {
+        ctx.lineTo(pointsForLive[i].x, pointsForLive[i].y);
+      }
       ctx.stroke();
       ctx.restore();
     }
@@ -430,8 +435,8 @@ function App() {
       <h2>NeatDraw</h2>
       <div style={{ marginBottom: 10 }}>
         <button onClick={clearCanvas}>Clear</button>
-        <button onClick={undo} disabled={historyIndex <= 0} style={{ marginLeft: 8 }}>Undo</button>
-        <button onClick={redo} disabled={historyIndex >= history.length - 1} style={{ marginLeft: 8 }}>Redo</button>
+        <button onClick={undo} disabled={strokeIndex <= 0} style={{ marginLeft: 8 }}>Undo</button>
+        <button onClick={redo} disabled={strokeIndex >= strokes.length} style={{ marginLeft: 8 }}>Redo</button>
       </div>
       <div style={{ marginBottom: 10 }}>
         <label style={{ marginRight: 10 }}>
