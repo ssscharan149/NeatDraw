@@ -463,6 +463,18 @@ function App() {
     { key: 'eraser', label: 'Eraser' },
   ];
 
+  // Download the current canvas as a PNG image
+  const downloadImage = () => {
+    const canvas = canvasRef.current;
+    const url = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'drawing.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="App" style={{ background: '#181818', minHeight: '100vh', color: '#fff' }}>
       <h2 style={{ color: '#fff' }}>NeatDraw</h2>
@@ -578,6 +590,7 @@ function App() {
         <button onClick={clearCanvas} style={{ marginLeft: 16, padding: '8px 18px', borderRadius: 6, border: '1px solid #444', background: '#222', color: '#fff', fontWeight: 'bold', fontSize: 16, cursor: 'pointer' }}>Clear</button>
         <button onClick={undo} disabled={strokeIndex <= 0} style={{ marginLeft: 8, padding: '8px 18px', borderRadius: 6, border: '1px solid #444', background: '#222', color: '#fff', fontWeight: 'bold', fontSize: 16, cursor: strokeIndex <= 0 ? 'not-allowed' : 'pointer', opacity: strokeIndex <= 0 ? 0.5 : 1 }}>Undo</button>
         <button onClick={redo} disabled={strokeIndex >= strokes.length} style={{ marginLeft: 8, padding: '8px 18px', borderRadius: 6, border: '1px solid #444', background: '#222', color: '#fff', fontWeight: 'bold', fontSize: 16, cursor: strokeIndex >= strokes.length ? 'not-allowed' : 'pointer', opacity: strokeIndex >= strokes.length ? 0.5 : 1 }}>Redo</button>
+        <button onClick={downloadImage} style={{ marginLeft: 8, padding: '8px 18px', borderRadius: 6, border: '1px solid #444', background: '#222', color: '#fff', fontWeight: 'bold', fontSize: 16, cursor: 'pointer' }}>Download</button>
       </div>
       <canvas
         ref={canvasRef}
