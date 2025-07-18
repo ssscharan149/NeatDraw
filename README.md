@@ -1,70 +1,86 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+# NeatDraw 🎨
 
-### `npm start`
+A modern, feature-rich drawing app built with React.  
+Draw, sketch, erase, create shapes, fill with color, undo/redo, and save or download your artwork—all in your browser!
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Features
 
-### `npm test`
+- **Freehand Drawing:** Pen, Brush, Pencil, and Eraser tools
+- **Shapes:** Line, Rectangle, Circle, Ellipse (with live preview)
+- **Fill or Outline:** Toggle to fill shapes with color or just draw the outline
+- **Color Picker & Palette:** Choose any color or pick from common swatches
+- **Adjustable Size:** Change brush and eraser size
+- **Undo/Redo:** Keyboard shortcuts (Ctrl+Z / Ctrl+Y) and buttons
+- **Clear Canvas:** Start fresh anytime
+- **Save/Load:** Store your drawing in your browser’s local storage
+- **Download:** Export your drawing as a PNG image
+- **Dark UI:** Beautiful, modern interface with a black canvas background
+- **Mobile-friendly:** Responsive design
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## Demo
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+[Live Demo on GitHub Pages](https://ssscharan149.github.io/NeatDraw)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Getting Started
 
-### `npm run eject`
+### 1. Clone the repository
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+git clone https://github.com/ssscharan149/NeatDraw.git
+cd NeatDraw/drawingapp-react
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 2. Install dependencies
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+npm install
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 3. Start the app locally
 
-## Learn More
+```bash
+npm start
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Deployment
 
-### Code Splitting
+This app is ready to deploy for free on [GitHub Pages](https://pages.github.com/):
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+1. Make sure your `package.json` includes:
+   ```json
+   "homepage": "https://your-username.github.io/NeatDraw",
+   "scripts": {
+     "predeploy": "npm run build",
+     "deploy": "gh-pages -d build"
+   }
+   ```
+2. Deploy:
+   ```bash
+   npm run deploy
+   ```
+3. Visit: `https://ssscharan149.github.io/NeatDraw`
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Keyboard Shortcuts
 
-### Making a Progressive Web App
+- **Undo:** Ctrl+Z (Cmd+Z on Mac)
+- **Redo:** Ctrl+Y (Cmd+Y on Mac)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+---
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Credits
+Inspired by classic paint apps and modern web tools.
