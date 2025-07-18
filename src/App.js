@@ -250,7 +250,7 @@ function App() {
       setCurrentPoints((pts) => [...pts, { x, y }]);
     }
     // Add freehand stroke to strokes array
-    if (currentPoints.length > 1) {
+    if (currentPoints.length === 1 || currentPoints.length > 1) {
       const newStroke = {
         type: 'freehand',
         style: strokeStyle,
