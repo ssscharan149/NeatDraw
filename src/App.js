@@ -436,6 +436,21 @@ function App() {
     replayStrokes();
   }, [strokes, strokeIndex]);
 
+  // Keyboard shortcuts for undo/redo
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (strokeIndex > 0) undo();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        if (strokeIndex < strokes.length) redo();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [strokeIndex, strokes.length]);
+
   // Tool button UI
   const toolButtons = [
     { key: 'pen', label: 'Pen' },
