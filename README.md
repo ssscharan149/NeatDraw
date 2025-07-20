@@ -21,7 +21,6 @@ Draw, sketch, erase, create shapes, fill with color, undo/redo, and save or down
 - **Save/Load:** Store your drawing in your browser’s local storage
 - **Download:** Export your drawing as a PNG image
 - **Dark UI:** Beautiful, modern interface with a black canvas background
-- **Mobile-friendly:** Responsive design
 
 ---
 
