@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/NeatDraw/static/css/main.c5f1fe3f.css",
-    "main.js": "/NeatDraw/static/js/main.19cf8cbd.js",
+    "main.js": "/NeatDraw/static/js/main.1b96fcb9.js",
     "static/js/453.81aaf385.chunk.js": "/NeatDraw/static/js/453.81aaf385.chunk.js",
     "index.html": "/NeatDraw/index.html",
     "main.c5f1fe3f.css.map": "/NeatDraw/static/css/main.c5f1fe3f.css.map",
-    "main.19cf8cbd.js.map": "/NeatDraw/static/js/main.19cf8cbd.js.map",
+    "main.1b96fcb9.js.map": "/NeatDraw/static/js/main.1b96fcb9.js.map",
     "453.81aaf385.chunk.js.map": "/NeatDraw/static/js/453.81aaf385.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.c5f1fe3f.css",
-    "static/js/main.19cf8cbd.js"
+    "static/js/main.1b96fcb9.js"
   ]
 }
